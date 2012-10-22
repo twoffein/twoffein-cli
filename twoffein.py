@@ -31,6 +31,7 @@ import json
 import StringIO
 import pwd
 import os
+import sys
 
 home = pwd.getpwuid(os.getuid())[5]
 if not os.access("%s/.twoffeinclirc" % home, os.F_OK|os.R_OK):
@@ -44,10 +45,17 @@ del home
 
 
 def main():
+	if len(sys.argv)==2:
+		drink_with = sys.argv[1]
+	else:
+		drink_with = ""
 	print "[H[2J"
 	print "Twoffein CLI–App"
 	print ""
-	print "Was willst du trinken?"
+	if drink_with == "":
+		print "Was willst du trinken?"
+	else:
+		print "Was willst du mit "+drink_with+" trinken?"
 	print ""
 	print " => schwarztee"
 	print " => mineralwasser"
@@ -61,7 +69,10 @@ def main():
 	print " => kakao"
 	print ""
 	drink = str(raw_input()).strip()
-	response = urllib2.urlopen("http://twoffein.com/api/post/tweet/?screen_name="+USER+"&api_key="+API_KEY+"&drink="+drink)
+	if drink_with == "":
+		response = urllib2.urlopen("http://twoffein.com/api/post/tweet/?screen_name="+USER+"&api_key="+API_KEY+"&drink="+drink)
+	else:
+		response = urllib2.urlopen("http://twoffein.com/api/post/tweet/?screen_name="+USER+"&api_key="+API_KEY+"&drink="+drink+"&target_screen_name="+drink_with)
 	ret = json.load(StringIO.StringIO(response.read()))
 	if ret["code"]=="luna":
 		print "Yeah!"
