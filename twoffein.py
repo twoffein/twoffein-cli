@@ -78,6 +78,7 @@ def main():
 		print "Yeah!"
 	elif ret["code"] == "pinkiepie":
 		print "Chill mal! Nicht so viel auf einmal trinken!"
+		print "Du darfst in "+str(ret["sleep"])+" Minuten wieder trinken."
 	elif ret["code"] == "rarity":
 		print "Bitte aktualisiere deinen API–Key in der Konfiguration!"
 	elif ret["code"] == "sweetiebelle":
