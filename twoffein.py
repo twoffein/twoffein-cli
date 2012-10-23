@@ -39,6 +39,7 @@ if not os.access("%s/.twoffeinclirc" % home, os.F_OK|os.R_OK):
 	f.write("# twoffein cli client configuration\n")
 	f.write("API_KEY = \"ABCDEFGHIJK\"")
 	f.write("USER = \"h4xx0r\"")
+	f.write("DRINKS = [ \"wasser\", \"cola\", \"schwarztee\" ]")
 	f.close()
 execfile("%s/.twoffeinclirc" % home )
 del home
@@ -57,16 +58,8 @@ def main():
 	else:
 		print "Was willst du mit "+drink_with+" trinken?"
 	print ""
-	print " => schwarztee"
-	print " => mineralwasser"
-	print " => wasser"
-	print " => milch"
-	print " => africola"
-	print " => fritzcola"
-	print " => cola"
-	print " => colamix"
-	print " => energiedrink"
-	print " => kakao"
+	for d in DRINKS:
+		print " => "+d
 	print ""
 	drink = str(raw_input()).strip()
 	if drink_with == "":
