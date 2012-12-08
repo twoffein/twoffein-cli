@@ -26,12 +26,10 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # 
 
-import urllib2
-import json
-import StringIO
 import pwd
 import os
 import sys
+import twoffein
 
 home = pwd.getpwuid(os.getuid())[5]
 if not os.access("%s/.twoffeinclirc" % home, os.F_OK|os.R_OK):
@@ -46,6 +44,7 @@ del home
 
 
 def main():
+	api = twoffein.Twoffein( (USER, API_KEY) )
 	if len(sys.argv)==2:
 		drink_with = sys.argv[1]
 	else:
@@ -62,11 +61,7 @@ def main():
 		print " => "+d
 	print ""
 	drink = str(raw_input()).strip()
-	if drink_with == "":
-		response = urllib2.urlopen("http://twoffein.com/api/post/tweet/?screen_name="+USER+"&api_key="+API_KEY+"&drink="+drink)
-	else:
-		response = urllib2.urlopen("http://twoffein.com/api/post/tweet/?screen_name="+USER+"&api_key="+API_KEY+"&drink="+drink+"&target_screen_name="+drink_with)
-	ret = json.load(StringIO.StringIO(response.read()))
+	ret = api.drink( twoffein.Drink(drink), ( None if drink_with == "" else drink_with) )
 	if ret["code"]=="luna":
 		print "Yeah!"
 	elif ret["code"] == "pinkiepie":
