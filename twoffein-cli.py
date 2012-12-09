@@ -31,6 +31,8 @@ import os
 import sys
 import twoffein
 import cmd
+import string
+import time
 
 home = pwd.getpwuid(os.getuid())[5]
 if not os.access("%s/.twoffeinclirc" % home, os.F_OK|os.R_OK):
@@ -73,7 +75,37 @@ class TwoffeinCLI(cmd.Cmd):
 		
 	def help_drink(self):
 		print '\n'.join(['drink [drink id] [optional: user you drink with]', 'Drink something'])
+		
+	def do_get(self, action, profile_id=""):
+		if action=="drinks":
+			drinks = self.twfn.get_drinks()
+			print "| Getränk                   | ID                  |"
+			print "+---------------------------+---------------------+"
+			for d in drinks:
+				print "| ", string.ljust(d["drink"], 24), "|", string.ljust(d["key"], 19), "|"
+			print "+---------------------------+---------------------+"
 
+		elif action.startswith("profile"):
+			profile = self.twfn.get_profile(profile_id)
+			print "Profil von",profile["screen_name"]
+			print ""
+			print "Mitglied seit:", time.strftime("%d.%m %Y %H:%M:%S", time.localtime(int(profile["first_login"])))
+			print "Getrunken:", profile["drunken"]
+			print "Rang:", profile["rank"], "("+profile["rank_title"]+")"
+			print "Lieblingsgetränk:",profile["drink"]
+			print "Aktuelle Quest:",profile["quest"]
+		
+	def help_get(self):
+		print '\n'.join(['get [profile|drinks] [profile_user]', '\tReturn the profile of a user or the list of drinks'])
+
+	def do_cookie(self, target):
+		ret = self.twfn.give_cookie(target)
+		print ret["code"]+":",
+		if ret.has_key("info"):
+			print ret["info"]
+		else:
+			print ret["error"]
+		
 	def do_EOF(self, line):
 		return True
 
