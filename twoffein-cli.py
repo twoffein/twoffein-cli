@@ -30,6 +30,7 @@ import pwd
 import os
 import sys
 import twoffein
+import cmd
 
 home = pwd.getpwuid(os.getuid())[5]
 if not os.access("%s/.twoffeinclirc" % home, os.F_OK|os.R_OK):
@@ -42,40 +43,42 @@ if not os.access("%s/.twoffeinclirc" % home, os.F_OK|os.R_OK):
 execfile("%s/.twoffeinclirc" % home )
 del home
 
+class TwoffeinCLI(cmd.Cmd):
+	""" Command line client for Twoffein.com """
+	
+	intro = "Twoffein Command Line"
+	prompt = "twoffein: "
+	doc_header = "Commands"
+	
+	def __init__(self):
+		cmd.Cmd.__init__(self)
+		self.twfn = twoffein.Twoffein( (USER, API_KEY) )
+		
+	def do_drink(self, drink, drink_with=""):
+		ret = self.twfn.drink( twoffein.Drink(drink), ( None if drink_with == "" else drink_with) )
+		print ret["code"]+':',
+		if ret["code"]=="luna":
+			print "Yeah!"
+		elif ret["code"] == "pinkiepie":
+			print "Chill mal! Nicht so viel auf einmal trinken!"
+			print "Du darfst in "+str(ret["sleep"])+" Minuten wieder trinken."
+		elif ret["code"] == "rarity":
+			print "Bitte aktualisiere deinen API–Key in der Konfiguration!"
+		elif ret["code"] == "sweetiebelle":
+			print "Doppelt hält nicht immer besser! Du hast das gleiche eben schonmal getrunken."
+		elif ret["code"] == "rainbowdash":
+			print "Ganz böse! Niemals die twoffein–Server mit anfragen überfluten!"
+		else:
+			print ret["error"]
+		
+	def help_drink(self):
+		print '\n'.join(['drink [drink id] [optional: user you drink with]', 'Drink something'])
+
+	def do_EOF(self, line):
+		return True
 
 def main():
-	api = twoffein.Twoffein( (USER, API_KEY) )
-	if len(sys.argv)==2:
-		drink_with = sys.argv[1]
-	else:
-		drink_with = ""
-	print "[H[2J"
-	print "Twoffein CLI–App"
-	print ""
-	if drink_with == "":
-		print "Was willst du trinken?"
-	else:
-		print "Was willst du mit "+drink_with+" trinken?"
-	print ""
-	for d in DRINKS:
-		print " => "+d
-	print ""
-	drink = str(raw_input()).strip()
-	ret = api.drink( twoffein.Drink(drink), ( None if drink_with == "" else drink_with) )
-	if ret["code"]=="luna":
-		print "Yeah!"
-	elif ret["code"] == "pinkiepie":
-		print "Chill mal! Nicht so viel auf einmal trinken!"
-		print "Du darfst in "+str(ret["sleep"])+" Minuten wieder trinken."
-	elif ret["code"] == "rarity":
-		print "Bitte aktualisiere deinen API–Key in der Konfiguration!"
-	elif ret["code"] == "sweetiebelle":
-		print "Doppelt hält nicht immer besser! Du hast das gleiche eben schonmal getrunken."
-	elif ret["code"] == "rainbowdash":
-		print "Ganz böse! Niemals die twoffein–Server mit anfragen überfluten!"
-	else:
-		print "Da ist was schief gelaufen…"
-		print ret["code"]+":",ret["error"]
+	TwoffeinCLI().cmdloop()
 
 if __name__=="__main__":
 	try:
